@@ -55,6 +55,10 @@
   --warning:    #7f4a00;
   --success:    #1f6b2a;
 
+  /* WhatsApp support chat (dark enough for white text and icon) */
+  --chat:       #0e7a55;
+  --chat-hover: #075e3f;
+
   /* Yellow reads on the blue sheet; paper surfaces override it to blue */
   --focus-ring: #ffcf40;
 
@@ -613,6 +617,56 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
 }
 .help-body .form-actions { margin-top: var(--space-4); }
 
+/* WhatsApp support chat: floating launcher + suggested-query dialog */
+.chat-fab {
+  --focus-ring: #ffcf40;
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--paper);
+  border-radius: 999px;
+  background: var(--chat);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 18px rgba(4, 18, 48, 0.45);
+  transition: background 0.15s, transform 0.15s;
+}
+.chat-fab:hover { background: var(--chat-hover); transform: translateY(-2px); }
+.chat-fab svg { width: 24px; height: 24px; flex: none; }
+.chat-header { background: var(--chat); }
+.chat-intro { color: var(--ink-700); font-size: 0.9rem; }
+.chat-queries {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.chat-query {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--stub);
+  color: var(--ink-900);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+.chat-query:hover { border-color: var(--chat); background: #e8f5ef; }
+.chat-query::after { content: "↗"; color: var(--chat); font-weight: 700; }
+.chat-blank { font-size: 0.85rem; margin-top: var(--space-4); }
+.chat-blank a { color: var(--chat); font-weight: 600; }
+
 .task-form { padding: var(--space-5); }
 .form-grid {
   display: grid;
@@ -641,7 +695,7 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
 .toast-region {
   position: fixed;
   right: var(--space-4);
-  bottom: var(--space-4);
+  bottom: calc(var(--space-4) + 64px); /* sits above the WhatsApp launcher */
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -702,7 +756,7 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
 
 @media (prefers-reduced-motion: reduce) {
   .modal, .toast { animation: none; }
-  .toast, .column { transition: none; }
+  .toast, .column, .chat-fab { transition: none; }
 }
 </style>
 </head>
@@ -918,6 +972,28 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
   </div>
 </div>
 
+<!-- WhatsApp IT support chat: floating launcher + suggested-query dialog -->
+<button type="button" class="chat-fab" id="open-chat" aria-haspopup="dialog" aria-controls="chat-backdrop">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M12 2a10 10 0 0 0-8.66 15l-1.3 4.76 4.87-1.28A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-2.9.76.78-2.83-.2-.31A8.2 8.2 0 1 1 12 20.2Zm4.5-6.14c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.55.12-.16.25-.63.8-.78.97-.14.16-.29.18-.53.06a6.7 6.7 0 0 1-3.3-2.89c-.25-.43.25-.4.71-1.33.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3 2.74 2.74 0 0 0-.85 2.03 4.76 4.76 0 0 0 1 2.53 10.9 10.9 0 0 0 4.18 3.69c1.55.67 2.16.73 2.94.61.47-.07 1.46-.6 1.66-1.18.2-.57.2-1.07.14-1.17-.06-.1-.22-.16-.47-.28Z"/>
+  </svg>
+  <span>IT support chat</span>
+</button>
+
+<div class="modal-backdrop" id="chat-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="chat-title" aria-describedby="chat-intro">
+    <div class="modal-header chat-header">
+      <h2 id="chat-title">IT support on WhatsApp</h2>
+      <button type="button" class="modal-close" id="close-chat" aria-label="Close IT support chat">×</button>
+    </div>
+    <div class="help-body">
+      <p class="chat-intro" id="chat-intro">Choose a question to start a WhatsApp chat with IT support. The message opens in WhatsApp so you can edit it before sending.</p>
+      <ul class="chat-queries" id="chat-queries" aria-label="Suggested questions"></ul>
+      <p class="chat-blank">Something else? <a id="chat-blank-link" target="_blank" rel="noopener noreferrer">Start a blank chat</a></p>
+    </div>
+  </div>
+</div>
+
 <!-- Toast notifications (announced politely to screen readers) -->
 <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
 
@@ -937,6 +1013,17 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
    ========================================================================== */
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
 const HELP_NOTICE_DELAY_MS = 10000;
+const WHATSAPP_NUMBER = "6512345678"; // country code + number, digits only (wa.me format)
+const CHAT_QUERIES = [
+  "I forgot my password or my account is locked",
+  "I can't connect to the VPN",
+  "My Outlook email isn't syncing",
+  "My laptop is running very slowly",
+  "I need software installed on my laptop",
+  "I need access to a shared drive or system",
+  "The printer isn't working",
+  "I want to report a suspicious email",
+];
 
 /* ==========================================================================
    Constants
@@ -1493,8 +1580,8 @@ function isHelpOpen() {
 }
 
 function showHelpNotice() {
-  // Never stack on top of the Add task dialog; wait until it has been closed.
-  if (isModalOpen()) {
+  // Never stack on top of another dialog; wait until it has been closed.
+  if (isModalOpen() || isChatOpen()) {
     setTimeout(showHelpNotice, 1000);
     return;
   }
@@ -1507,6 +1594,43 @@ function closeHelpNotice() {
   document.getElementById("help-backdrop").hidden = true;
   if (helpReturnFocus && document.contains(helpReturnFocus)) helpReturnFocus.focus();
   helpReturnFocus = null;
+}
+
+/* --- WhatsApp IT support chat: suggested queries open wa.me with the text --- */
+function whatsappLink(text) {
+  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+}
+
+function buildChatQueries() {
+  const list = document.getElementById("chat-queries");
+  CHAT_QUERIES.forEach((query) => {
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.className = "chat-query";
+    link.href = whatsappLink(`Hi IT support. ${query}.`);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = query;
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+  document.getElementById("chat-blank-link").href = whatsappLink("");
+}
+
+function isChatOpen() {
+  return !document.getElementById("chat-backdrop").hidden;
+}
+
+function openChat() {
+  if (isHelpOpen()) closeHelpNotice();
+  document.getElementById("chat-backdrop").hidden = false;
+  document.querySelector("#chat-queries .chat-query").focus();
+}
+
+function closeChat() {
+  document.getElementById("chat-backdrop").hidden = true;
+  document.getElementById("open-chat").focus();
 }
 
 function trapModalFocus(event, backdropId = "modal-backdrop") {
@@ -1622,6 +1746,11 @@ function handleKeydown(event) {
     else trapModalFocus(event, "help-backdrop");
     return;
   }
+  if (isChatOpen()) {
+    if (event.key === "Escape") closeChat();
+    else trapModalFocus(event, "chat-backdrop");
+    return;
+  }
   if (isModalOpen()) {
     if (event.key === "Escape") closeModal();
     else trapModalFocus(event);
@@ -1710,6 +1839,16 @@ function init() {
     if (e.target.id === "help-backdrop") closeHelpNotice();
   });
   setTimeout(showHelpNotice, HELP_NOTICE_DELAY_MS);
+
+  // WhatsApp IT support chat
+  buildChatQueries();
+  document.getElementById("open-chat").addEventListener("click", openChat);
+  document.getElementById("close-chat").addEventListener("click", closeChat);
+  const chatBackdrop = document.getElementById("chat-backdrop");
+  chatBackdrop.addEventListener("click", (e) => {
+    if (e.target === chatBackdrop) closeChat();
+    else if (e.target.closest("a[href]")) closeChat(); // chat opened in a new tab
+  });
 
   document.addEventListener("keydown", handleKeydown);
 

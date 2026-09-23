@@ -23,6 +23,7 @@ The original design (v1) is at https://garylty-gh.github.io/kanban4/.
 - **Priorities:** Critical, High, Medium, and Low, shown by colour and by text.
 - **Inline delete confirmation:** "Delete? Yes / No" appears on the card, with no browser confirmation dialog.
 - **Support hotline notice:** after 10 seconds on the page, a dialog thanks the visitor and gives the IT support hotline (1234 5678, a tap-to-call link on phones). It appears once per page load, waits if the Add task form is open, and closes with **Got it**, ×, Escape, or a click outside it.
+- **WhatsApp IT support chat:** a floating **IT support chat** button sits at the bottom right. It opens a dialog of suggested questions (password reset, VPN, Outlook, software, access requests, printers, suspicious email). Choosing one opens WhatsApp with that message pre-filled for the support number, +65 1234 5678, and visitors can also start a blank chat. The number and questions are the `WHATSAPP_NUMBER` and `CHAT_QUERIES` constants at the top of the script.
 - **Accessibility:** labelled inputs, visible focus rings, `aria-live` announcements, and full keyboard operation.
 - **Responsive layout:** a sidebar with 4 lanes on wide screens, a 2×2 board on smaller desktops and tablets, and a single stacked column on phones.
 
