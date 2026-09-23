@@ -6,6 +6,8 @@ A lightweight Kanban board for tracking IT project tasks, built as an internal d
 
 **Live demo:** https://garylty-gh.github.io/kanban4/
 
+![Screenshot of the Kanban board](docs/screenshot.png)
+
 ## Features
 
 - **Four status columns:** Backlog, In Progress, Blocked, and Done, each with a live task count.
