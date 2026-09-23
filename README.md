@@ -21,13 +21,15 @@ The original design (v1) is at https://garylty-gh.github.io/kanban4/.
 - **Board status:** totals per status across all tasks, plus the overdue count, in the sidebar.
 - **Overdue detection:** tasks past their due date that are not Done are flagged. The seed data uses dates relative to today, so overdue examples always appear.
 - **Priorities:** Critical, High, Medium, and Low, shown by colour and by text.
-- **Inline delete confirmation:** "Delete? Yes / No" appears on the card, with no pop-up dialogs.
+- **Inline delete confirmation:** "Delete? Yes / No" appears on the card, with no browser confirmation dialog.
+- **Support hotline notice:** after 10 seconds on the page, a dialog thanks the visitor and gives the IT support hotline (1234 5678, a tap-to-call link on phones). It appears once per page load, waits if the Add task form is open, and closes with **Got it**, ×, Escape, or a click outside it.
 - **Accessibility:** labelled inputs, visible focus rings, `aria-live` announcements, and full keyboard operation.
 - **Responsive layout:** a sidebar with 4 lanes on wide screens, a 2×2 board on smaller desktops and tablets, and a single stacked column on phones.
 
 ## Design
 
 The board is drawn as a project blueprint: a cobalt drafting grid, a sidebar styled as a drawing's title block, and tasks as white paper tickets. Blocked lanes use dashed lines, the drafting convention for pending work. Fonts are system fonts only: Bahnschrift (on Windows) for headings and numbers, and the platform UI font for body text.
+
 ## Running locally
 
 Open `index.html` directly in a browser. That's all you need.
@@ -49,6 +51,10 @@ const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/you@example.com";
 ```
 
 FormSubmit sends a one-time activation email to that address the first time it is used. Any address you put here is public once the site is published.
+
+### Configuring the support notice
+
+The delay is set by `HELP_NOTICE_DELAY_MS` at the top of the `<script>` block (default `10000`, in milliseconds). The hotline number and wording are in the `#help-backdrop` markup, just above the toast region in `index.html`.
 
 ## No persistence
 
