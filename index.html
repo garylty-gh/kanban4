@@ -600,6 +600,19 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
 }
 .modal-close:hover { background: rgba(255, 255, 255, 0.15); }
 
+/* Support notice shown after 10 s on the page */
+.modal-sm { max-width: 440px; margin-top: 12vh; }
+.help-body { padding: var(--space-5); line-height: 1.5; }
+.help-body p + p { margin-top: var(--space-3); }
+.help-hotline {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--blue-700);
+  letter-spacing: 0.04em;
+}
+.help-body .form-actions { margin-top: var(--space-4); }
+
 .task-form { padding: var(--space-5); }
 .form-grid {
   display: grid;
@@ -887,6 +900,24 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
   </div>
 </div>
 
+<!-- Support notice: opens once after the visitor has been on the page for 10 s -->
+<div class="modal-backdrop" id="help-backdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="help-title" aria-describedby="help-desc">
+    <div class="modal-header">
+      <h2 id="help-title">Thanks for visiting</h2>
+      <button type="button" class="modal-close" id="close-help" aria-label="Close support notice">×</button>
+    </div>
+    <div class="help-body" id="help-desc">
+      <p>Thank you for visiting the IT PMO portal.</p>
+      <p>If you need further assistance, please call the IT support hotline:<br>
+        <a class="help-hotline" href="tel:12345678">1234 5678</a></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="dismiss-help">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast notifications (announced politely to screen readers) -->
 <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
 
@@ -905,6 +936,7 @@ main { padding: var(--space-5) var(--space-5) var(--space-6) var(--space-2); }
    CONFIG — change the email address here (and only here)
    ========================================================================== */
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
+const HELP_NOTICE_DELAY_MS = 10000;
 
 /* ==========================================================================
    Constants
@@ -1453,11 +1485,35 @@ function closeModal() {
   document.getElementById("open-add-task").focus();
 }
 
-function trapModalFocus(event) {
+/* --- Support notice: shown once per page load after HELP_NOTICE_DELAY_MS --- */
+let helpReturnFocus = null;
+
+function isHelpOpen() {
+  return !document.getElementById("help-backdrop").hidden;
+}
+
+function showHelpNotice() {
+  // Never stack on top of the Add task dialog; wait until it has been closed.
+  if (isModalOpen()) {
+    setTimeout(showHelpNotice, 1000);
+    return;
+  }
+  helpReturnFocus = document.activeElement;
+  document.getElementById("help-backdrop").hidden = false;
+  document.getElementById("dismiss-help").focus();
+}
+
+function closeHelpNotice() {
+  document.getElementById("help-backdrop").hidden = true;
+  if (helpReturnFocus && document.contains(helpReturnFocus)) helpReturnFocus.focus();
+  helpReturnFocus = null;
+}
+
+function trapModalFocus(event, backdropId = "modal-backdrop") {
   if (event.key !== "Tab") return;
-  const modal = document.querySelector("#modal-backdrop .modal");
+  const modal = document.querySelector(`#${backdropId} .modal`);
   const focusables = Array.from(modal.querySelectorAll(
-    "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
+    "button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
   ));
   if (!focusables.length) return;
   const first = focusables[0];
@@ -1561,6 +1617,11 @@ function clearDropHighlights() {
 
 /* --- Global keyboard: Escape closes modal, move menu or delete prompt --- */
 function handleKeydown(event) {
+  if (isHelpOpen()) {
+    if (event.key === "Escape") closeHelpNotice();
+    else trapModalFocus(event, "help-backdrop");
+    return;
+  }
   if (isModalOpen()) {
     if (event.key === "Escape") closeModal();
     else trapModalFocus(event);
@@ -1641,6 +1702,14 @@ function init() {
     const item = e.target.closest("button[data-jump]");
     if (item) jumpToTask(item.dataset.jump);
   });
+
+  // Support notice
+  document.getElementById("close-help").addEventListener("click", closeHelpNotice);
+  document.getElementById("dismiss-help").addEventListener("click", closeHelpNotice);
+  document.getElementById("help-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "help-backdrop") closeHelpNotice();
+  });
+  setTimeout(showHelpNotice, HELP_NOTICE_DELAY_MS);
 
   document.addEventListener("keydown", handleKeydown);
 
